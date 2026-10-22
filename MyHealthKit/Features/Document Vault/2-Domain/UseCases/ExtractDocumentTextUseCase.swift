@@ -1,6 +1,4 @@
 import Foundation
-import PDFKit
-import UIKit
 
 /// Pure text extraction — no AI involved. Kept separate from summarization so
 /// a "this document has no readable text" failure is distinguishable from an
@@ -10,10 +8,10 @@ import UIKit
 /// common for a scanned/photographed document saved as a PDF — falls back to
 /// on-device OCR of each rendered page. For raw images: goes straight to OCR.
 struct ExtractDocumentTextUseCaseImpl: ExtractDocumentTextUseCaseProtocol {
-    private let textRecognizer: ImageTextRecognizer
+    private let textExtractor: DocumentTextExtractorProtocol
 
-    init(textRecognizer: ImageTextRecognizer = ImageTextRecognizer()) {
-        self.textRecognizer = textRecognizer
+    init(textExtractor: DocumentTextExtractorProtocol) {
+        self.textExtractor = textExtractor
     }
 
     func execute(fileURL: URL, kind: VaultDocumentKind) async throws -> String {
@@ -21,34 +19,26 @@ struct ExtractDocumentTextUseCaseImpl: ExtractDocumentTextUseCaseProtocol {
         case .pdf:
             return try await extractFromPDF(fileURL: fileURL)
         case .image:
-            return try await extractFromImage(fileURL: fileURL)
+            return try nonEmpty(await textExtractor.recognizedText(inImageAt: fileURL))
         }
     }
 
     private func extractFromPDF(fileURL: URL) async throws -> String {
-        guard let document = PDFDocument(url: fileURL) else {
-            throw ExtractDocumentTextError.couldNotOpenDocument
-        }
-
-        if let embeddedText = document.string, !embeddedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        let embeddedText = try textExtractor.embeddedText(inPDFAt: fileURL)
+        if !isBlank(embeddedText) {
             return embeddedText
         }
-
-        let ocrText = try await textRecognizer.recognizeText(inPDF: document)
-        guard !ocrText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            throw ExtractDocumentTextError.noTextLayer
-        }
-        return ocrText
+        return try nonEmpty(await textExtractor.recognizedText(inPDFAt: fileURL))
     }
 
-    private func extractFromImage(fileURL: URL) async throws -> String {
-        guard let image = UIImage(contentsOfFile: fileURL.path) else {
-            throw ExtractDocumentTextError.couldNotOpenDocument
-        }
-        let ocrText = try await textRecognizer.recognizeText(in: image)
-        guard !ocrText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+    private func nonEmpty(_ text: String) throws -> String {
+        guard !isBlank(text) else {
             throw ExtractDocumentTextError.noTextLayer
         }
-        return ocrText
+        return text
+    }
+
+    private func isBlank(_ text: String) -> Bool {
+        text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }
