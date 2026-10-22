@@ -10,27 +10,20 @@ final class DoctorRepositoryImpl: DoctorRepositoryProtocol {
     func search(criteria: SearchCriteria, forceRefresh: Bool) async throws -> [Doctor] {
         let userLocation = CLLocation(latitude: criteria.userLatitude, longitude: criteria.userLongitude)
 
-        let results = try await placesSource.nearbyMedicalFacilities(
+        let results = try await placesSource.searchMedicalFacilities(
+            specialty: criteria.specialty,
             latitude: criteria.userLatitude,
             longitude: criteria.userLongitude,
             radiusInMeters: criteria.radiusInMeters,
             forceRefresh: forceRefresh
         )
 
-        let filtered = filter(results, by: criteria, userLocation: userLocation)
-        return sortByDistance(filtered, from: userLocation)
-    }
-
-    private func filter(_ doctors: [Doctor], by criteria: SearchCriteria, userLocation: CLLocation) -> [Doctor] {
-        doctors.filter { doctor in
-            let doctorLocation = CLLocation(latitude: doctor.latitude, longitude: doctor.longitude)
-            guard doctorLocation.distance(from: userLocation) <= criteria.radiusInMeters else { return false }
-
-            if let specialty = criteria.specialty, !specialty.isEmpty {
-                guard doctor.specialty.localizedCaseInsensitiveContains(specialty) else { return false }
-            }
-            return true
+        // Text search only biases toward the location, unlike nearby search's
+        // hard radius restriction, so still clamp to the requested radius.
+        let withinRadius = results.filter { doctor in
+            CLLocation(latitude: doctor.latitude, longitude: doctor.longitude).distance(from: userLocation) <= criteria.radiusInMeters
         }
+        return sortByDistance(withinRadius, from: userLocation)
     }
 
     private func sortByDistance(_ doctors: [Doctor], from userLocation: CLLocation) -> [Doctor] {
@@ -41,3 +34,5 @@ final class DoctorRepositoryImpl: DoctorRepositoryProtocol {
         }
     }
 }
+
+

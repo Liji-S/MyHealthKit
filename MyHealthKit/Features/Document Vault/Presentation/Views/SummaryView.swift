@@ -22,7 +22,7 @@ struct SummaryView: View {
                         statusView(message: "Reading document…")
 
                     case .summarizing:
-                        statusView(message: "Summarizing…")
+                        summarizingStatusView
 
                     case .result(let summary):
                         Text(summary)
@@ -62,8 +62,26 @@ struct SummaryView: View {
         .padding(.top, 40)
     }
 
+    private var summarizingStatusView: some View {
+        HStack {
+            ProgressView()
+            CyclingStatusText(phrases: [
+                "Summarizing…",
+                "Reading through the document…",
+                "Reviewing key details…",
+                "Spotting the important parts…",
+                "Organizing findings…",
+                "Putting it in plain language…",
+                "Almost done…"
+            ], interval: 1.8)
+            .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 40)
+    }
+
     private var disclaimer: some View {
-        Text("This summary is AI-generated and may contain mistakes. For medical documents, always discuss results with a doctor.")
+        Text("This summary is AI-generated and may contain mistakes.")
             .font(.caption)
             .foregroundStyle(.secondary)
             .padding(.top, 8)

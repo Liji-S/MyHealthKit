@@ -53,10 +53,7 @@ final class DocumentRepositoryImpl: DocumentRepositoryProtocol {
 
     func delete(_ document: VaultDocument) throws {
         let targetID = document.id
-        let descriptor = FetchDescriptor<VaultDocumentRecord>(
-            predicate: #Predicate { $0.id == targetID }
-        )
-        guard let record = try modelContext.fetch(descriptor).first else { return }
+        guard let record = try modelContext.first(VaultDocumentRecord.self, where: #Predicate { $0.id == targetID }) else { return }
         try fileStore.delete(relativePath: record.relativePath)
         modelContext.delete(record)
         try modelContext.save()

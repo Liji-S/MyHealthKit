@@ -13,17 +13,19 @@ final class CachedGooglePlacesDataSource: GooglePlacesDataSourceProtocol {
         self.logger = logger
     }
 
-    func nearbyMedicalFacilities(
+    func searchMedicalFacilities(
+        specialty: String?,
         latitude: Double,
         longitude: Double,
         radiusInMeters: Double,
         forceRefresh: Bool
     ) async throws -> [Doctor] {
-        let key = PlacesSearchCacheKey(latitude: latitude, longitude: longitude, radiusInMeters: radiusInMeters)
+        let key = PlacesSearchCacheKey(specialty: specialty, latitude: latitude, longitude: longitude, radiusInMeters: radiusInMeters)
         var servedFromCache = true
         let results = try await cache.results(for: key, bypassCache: forceRefresh) { [wrapped] in
             servedFromCache = false
-            return try await wrapped.nearbyMedicalFacilities(
+            return try await wrapped.searchMedicalFacilities(
+                specialty: specialty,
                 latitude: latitude,
                 longitude: longitude,
                 radiusInMeters: radiusInMeters,

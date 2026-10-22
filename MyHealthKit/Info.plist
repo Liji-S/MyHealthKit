@@ -18,8 +18,26 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>GOOGLE_PLACES_API_KEY</key>
+	<string>$(GOOGLE_PLACES_API_KEY)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+		<string>whatsapp</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Used to find doctors, clinics, and pharmacies near you, and to share your location during an emergency call.</string>
+	<key>OLLAMA_HOST</key>
+	<string>$(OLLAMA_HOST)</string>
+	<key>OLLAMA_MODEL</key>
+	<string>$(OLLAMA_MODEL)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -46,23 +64,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Used to find doctors, clinics, and pharmacies near you, and to share your location during an emergency call.</string>
-	<key>GOOGLE_PLACES_API_KEY</key>
-	<string>$(GOOGLE_PLACES_API_KEY)</string>
-	<key>OLLAMA_HOST</key>
-	<string>$(OLLAMA_HOST)</string>
-	<key>OLLAMA_MODEL</key>
-	<string>$(OLLAMA_MODEL)</string>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>tel</string>
-		<string>whatsapp</string>
-	</array>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-	</dict>
 </dict>
 </plist>

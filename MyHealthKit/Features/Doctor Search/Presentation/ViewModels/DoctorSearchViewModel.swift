@@ -8,7 +8,8 @@ final class DoctorSearchViewModel {
     private(set) var doctors: [Doctor] = []
     private(set) var isLoading = false
     private(set) var errorMessage: String?
-    private(set) var isParsingChatQuery = false
+    private(set) var isParsingQuery = false
+    private(set) var hasSearched = false
 
     /// Resolved photo images, keyed by Doctor.id. Fetched once per search
     /// result set here in the ViewModel rather than via a per-card async task
@@ -20,9 +21,9 @@ final class DoctorSearchViewModel {
     /// ongoing async work of their own to interfere with gestures.
     private(set) var resolvedImages: [String: UIImage] = [:]
 
-    var specialty: String = ""
+    private(set) var specialty: String = ""
     var radiusInMeters: Double = 20000
-    var chatQuery: String = ""
+    var searchText: String = ""
 
     private let searchUseCase: SearchDoctorsUseCaseProtocol
     private let locationProvider: LocationProvidingProtocol
@@ -45,6 +46,7 @@ final class DoctorSearchViewModel {
     }
 
     func search(forceRefresh: Bool = false) async {
+        hasSearched = true
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
@@ -77,21 +79,23 @@ final class DoctorSearchViewModel {
         }
     }
 
-    /// Parses a free-text query (e.g. "Arabic speaking dermatologist near me")
-    /// into a specialty filter, then runs the normal search.
-    func searchFromChatQuery() async {
-        guard !chatQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+    /// Parses `searchText` — a specialty word or a free-text query like
+    /// "Arabic speaking dermatologist near me" — into a specialty filter,
+    /// then runs the search.
+    func searchFromText() async {
+        let trimmedQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuery.isEmpty else { return }
 
-        isParsingChatQuery = true
+        isParsingQuery = true
         errorMessage = nil
-        defer { isParsingChatQuery = false }
+        defer { isParsingQuery = false }
 
         do {
-            let filters = try await parseQueryUseCase.execute(query: chatQuery)
-            specialty = filters.specialty ?? ""
+            let filters = try await parseQueryUseCase.execute(query: trimmedQuery)
+            specialty = filters.searchQuery ?? trimmedQuery
             await search()
         } catch {
-            errorMessage = "Couldn't understand that. Try the filter below instead."
+            errorMessage = "Couldn't understand that. Try a simpler search term."
         }
     }
 

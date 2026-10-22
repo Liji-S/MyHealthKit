@@ -32,10 +32,7 @@ final class MedicationRepositoryImpl: MedicationRepositoryProtocol {
 
     func update(_ medication: Medication) throws {
         let targetID = medication.id
-        let descriptor = FetchDescriptor<MedicationRecord>(
-            predicate: #Predicate { $0.id == targetID }
-        )
-        guard let record = try modelContext.fetch(descriptor).first else { return }
+        guard let record = try modelContext.first(MedicationRecord.self, where: #Predicate { $0.id == targetID }) else { return }
         record.name = medication.name
         record.dosage = medication.dosage
         record.initialSupply = medication.initialSupply
@@ -47,10 +44,7 @@ final class MedicationRepositoryImpl: MedicationRepositoryProtocol {
 
     func delete(_ medication: Medication) throws {
         let targetID = medication.id
-        let descriptor = FetchDescriptor<MedicationRecord>(
-            predicate: #Predicate { $0.id == targetID }
-        )
-        guard let record = try modelContext.fetch(descriptor).first else { return }
+        guard let record = try modelContext.first(MedicationRecord.self, where: #Predicate { $0.id == targetID }) else { return }
         modelContext.delete(record)
         try modelContext.save()
     }

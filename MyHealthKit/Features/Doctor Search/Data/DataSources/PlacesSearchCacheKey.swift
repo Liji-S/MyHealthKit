@@ -6,19 +6,22 @@ struct PlacesSearchCacheKey: Hashable {
     private let latitudeBucket: Int
     private let longitudeBucket: Int
     private let radiusBucket: Int
+    private let specialty: String
 
-    init(latitude: Double, longitude: Double, radiusInMeters: Double) {
+    init(specialty: String?, latitude: Double, longitude: Double, radiusInMeters: Double) {
         // ~0.0045 degrees latitude ≈ 500m.
         let gridSize = 0.0045
         latitudeBucket = Int((latitude / gridSize).rounded())
         longitudeBucket = Int((longitude / gridSize).rounded())
         radiusBucket = Int((radiusInMeters / 1000).rounded())
+        self.specialty = (specialty ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 
     /// Stable across app launches, unlike Swift's Hasher (randomly seeded per
     /// process) — required for a filename that needs to be found again after
     /// the app restarts.
     var stableIdentifier: String {
-        "\(latitudeBucket)_\(longitudeBucket)_\(radiusBucket)"
+        let specialtyComponent = specialty.isEmpty ? "any" : specialty.replacingOccurrences(of: "/", with: "-")
+        return "\(latitudeBucket)_\(longitudeBucket)_\(radiusBucket)_\(specialtyComponent)"
     }
 }

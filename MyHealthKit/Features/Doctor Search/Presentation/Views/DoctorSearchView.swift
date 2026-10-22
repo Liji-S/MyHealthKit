@@ -6,7 +6,7 @@ struct DoctorSearchView: View {
     @FocusState private var focusedField: Field?
 
     private enum Field {
-        case chat, specialty
+        case search
     }
 
     init(viewModel: DoctorSearchViewModel) {
@@ -27,6 +27,12 @@ struct DoctorSearchView: View {
             } else if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
                     .foregroundStyle(.red)
+            } else if !viewModel.hasSearched {
+                ContentUnavailableView(
+                    "Search for a Doctor",
+                    systemImage: "stethoscope",
+                    description: Text("Enter a specialty or describe what you need above.")
+                )
             } else if viewModel.doctors.isEmpty {
                 ContentUnavailableView(
                     "No Results",
@@ -52,51 +58,41 @@ struct DoctorSearchView: View {
                 Button("Done") { focusedField = nil }
             }
         }
-        .task {
-            await viewModel.search()
-        }
         .refreshable {
             await viewModel.search(forceRefresh: true)
         }
     }
 
     private var searchCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Filter directly")
-                    .font(.subheadline.weight(.semibold))
-                TextField("Specialty", text: $viewModel.specialty)
-                    .focused($focusedField, equals: .specialty)
-            }
-
-            Divider()
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Or ask in your own words")
-                    .font(.subheadline.weight(.semibold))
-                HStack {
-                    TextField("e.g. Arabic speaking dermatologist near me", text: $viewModel.chatQuery)
-                        .focused($focusedField, equals: .chat)
-                        .onSubmit { Task { await viewModel.searchFromChatQuery() } }
-                    if viewModel.isParsingChatQuery {
-                        ProgressView()
-                    } else {
-                        Button {
-                            Task { await viewModel.searchFromChatQuery() }
-                        } label: {
-                            Image(systemName: "arrow.up.circle.fill")
-                                .font(.title2)
-                        }
-                        .disabled(viewModel.chatQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Find a doctor")
+                .font(.subheadline.weight(.semibold))
+            HStack {
+                TextField("e.g. dermatologist, or \"Arabic speaking dermatologist near me\"", text: $viewModel.searchText)
+                    .focused($focusedField, equals: .search)
+                    .onSubmit { runSearch() }
+                if viewModel.isParsingQuery {
+                    ProgressView()
+                } else {
+                    Button {
+                        runSearch()
+                    } label: {
+                        Image(systemName: "magnifyingglass.circle.fill")
+                            .font(.title2)
                     }
+                    .disabled(viewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .cardBackground()
         .padding(.horizontal)
-        .padding(.top)
+        .padding(.vertical)
+    }
+
+    private func runSearch() {
+        focusedField = nil
+        Task { await viewModel.searchFromText() }
     }
 }
 
@@ -151,15 +147,13 @@ private struct DoctorCard: View {
                     Label(doctor.address, systemImage: "mappin.and.ellipse")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .lineLimit(2)
                 }
 
                 actionRow
             }
             .padding(12)
         }
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .cardBackground()
         .padding(.horizontal)
         .padding(.vertical, 6)
     }

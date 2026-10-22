@@ -8,9 +8,16 @@ struct ParseDoctorSearchQueryUseCaseImpl: ParseDoctorSearchQueryUseCaseProtocol 
     private let chatClient: ChatCompletionClientProtocol
 
     private let systemPrompt = """
-    Extract the medical specialty being searched for from the user's message. Respond \
-    with ONLY a JSON object with exactly this key: "specialty". Use null if no specialty \
-    is mentioned. No other text, no explanation.
+    The user is searching for a doctor or medical facility. Turn their message into a \
+    concise search phrase suitable for a places/business search engine — keep the \
+    medical specialty and any qualifiers they mentioned (spoken language, gender \
+    preference, etc.), but drop location phrases like "near me" since location is \
+    handled separately.
+
+    For example: "Arabic speaking dermatologist near me" → "Arabic speaking dermatologist".
+
+    Respond with ONLY a JSON object with exactly this key: "searchQuery". Use null if \
+    no medical specialty or search intent can be determined. No other text, no explanation.
     """
 
     init(chatClient: ChatCompletionClientProtocol) {
@@ -28,10 +35,10 @@ struct ParseDoctorSearchQueryUseCaseImpl: ParseDoctorSearchQueryUseCaseProtocol 
             throw ParseDoctorSearchQueryError.invalidResponse
         }
         let decoded = try JSONDecoder().decode(ExtractedFiltersDTO.self, from: data)
-        return ParsedDoctorSearchFilters(specialty: decoded.specialty)
+        return ParsedDoctorSearchFilters(searchQuery: decoded.searchQuery)
     }
 }
 
 private struct ExtractedFiltersDTO: Decodable {
-    let specialty: String?
+    let searchQuery: String?
 }

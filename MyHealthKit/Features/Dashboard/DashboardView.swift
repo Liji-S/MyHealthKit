@@ -65,8 +65,7 @@ private struct ComplianceScoreCard: View {
                 .foregroundStyle(.secondary)
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .cardBackground()
     }
 }
 
@@ -95,8 +94,7 @@ private struct UpcomingExpiriesCard: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .cardBackground()
         }
         .buttonStyle(.plain)
     }
@@ -123,29 +121,14 @@ private struct UpcomingRefillRow: View {
     }
 }
 
-private enum FeatureStatus {
-    case live
-    case comingSoon
-}
-
-private struct StatusBadge: View {
-    let status: FeatureStatus
-
-    var body: some View {
-        Text(status == .live ? "Live" : "Coming soon")
-            .font(.caption2.bold())
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(status == .live ? Color.green.opacity(0.15) : Color.orange.opacity(0.15))
-            .foregroundStyle(status == .live ? .green : .orange)
-            .clipShape(Capsule())
-    }
-}
-
 private struct QuickActionsGrid: View {
     let onNavigate: (AppRoute) -> Void
 
-    private let columns = [GridItem(.flexible()), GridItem(.flexible())]
+    // Adaptive rather than a fixed 2-column split: stays 2-up on iPhone
+    // widths, but grows to 3-4 columns as the available width increases
+    // (iPad, or the detail pane of the split view), instead of just
+    // stretching the same 2 columns wider.
+    private let columns = [GridItem(.adaptive(minimum: 130, maximum: 220), spacing: 12)]
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: 12) {
@@ -162,31 +145,5 @@ private struct QuickActionsGrid: View {
                 onNavigate(.medicationReminders)
             }
         }
-    }
-}
-
-private struct QuickActionTile: View {
-    let title: String
-    let systemImage: String
-    let tint: Color
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: 8) {
-                Image(systemName: systemImage)
-                    .font(.title2)
-                    .foregroundStyle(tint)
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.primary)
-                    .multilineTextAlignment(.leading)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-        }
-        .buttonStyle(.plain)
     }
 }

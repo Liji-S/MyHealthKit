@@ -6,6 +6,10 @@ struct EmergencySOSView: View {
     @State private var holdProgress: Double = 0
     @State private var isHolding = false
 
+    // Scales the hold-button circle with Dynamic Type so the emergency
+    // number inside it never gets clipped at larger accessibility sizes.
+    @ScaledMetric(relativeTo: .largeTitle) private var buttonDiameter: CGFloat = 200
+
     private let holdDuration: Double = 2.0
     private let progressTimer = Timer.publish(every: 0.02, on: .main, in: .common).autoconnect()
 
@@ -33,10 +37,13 @@ struct EmergencySOSView: View {
                     .stroke(Color.red, style: StrokeStyle(lineWidth: 10, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 Text(viewModel.emergencyNumber)
-                    .font(.system(size: 48, weight: .bold))
+                    .font(.largeTitle.bold())
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
                     .foregroundStyle(.red)
+                    .padding(.horizontal, 8)
             }
-            .frame(width: 200, height: 200)
+            .frame(width: buttonDiameter, height: buttonDiameter)
             .contentShape(Circle())
             .scaleEffect(isHolding ? 0.95 : 1.0)
             .animation(.easeOut(duration: 0.15), value: isHolding)
