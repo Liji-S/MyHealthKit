@@ -14,17 +14,21 @@ struct MyHealthKitApp: App {
 /// Picks the root layout by size class: a sidebar split view on regular-width
 /// screens (iPad, or an iPhone Pro Max in landscape), and the familiar
 /// tab bar on compact-width screens (iPhone in portrait).
+///
+/// The coordinator lives here, above both layouts, so navigation state
+/// survives a size-class change.
 private struct RootView: View {
     let container: AppContainer
     @State private var coordinator = AppCoordinator()
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
+        let factory = RouteViewFactory(container: container, coordinator: coordinator)
         Group {
             if horizontalSizeClass == .regular {
-                RootSplitView(container: container, coordinator: coordinator)
+                RootSplitView(coordinator: coordinator, factory: factory)
             } else {
-                RootTabView(container: container, coordinator: coordinator)
+                RootTabView(coordinator: coordinator, factory: factory)
             }
         }
     }
@@ -33,8 +37,8 @@ private struct RootView: View {
 /// iPad / regular-width layout: a sidebar of every top-level destination and
 /// a detail column showing whichever one is selected.
 private struct RootSplitView: View {
-    let container: AppContainer
     @Bindable var coordinator: AppCoordinator
+    let factory: RouteViewFactory
 
     var body: some View {
         NavigationSplitView {
@@ -45,83 +49,36 @@ private struct RootSplitView: View {
             .navigationTitle("MyHealthKit")
         } detail: {
             NavigationStack {
-                destination(for: coordinator.selectedRoute ?? .dashboard)
+                factory.view(for: coordinator.selectedRoute ?? .dashboard)
             }
-        }
-    }
-
-    @ViewBuilder
-    private func destination(for route: AppRoute) -> some View {
-        switch route {
-        case .dashboard:
-            DashboardView(viewModel: container.dashboard.makeDashboardViewModel()) { route in
-                coordinator.selectedRoute = route
-            }
-        case .doctorSearch:
-            DoctorSearchView(viewModel: container.doctorSearch.makeDoctorSearchViewModel())
-        case .emergencySOS:
-            EmergencySOSView(viewModel: container.emergencySOS.makeEmergencySOSViewModel())
-        case .firstAidGuide:
-            FirstAidGuideView(viewModel: container.firstAid.makeFirstAidGuideViewModel())
-        case .medicationReminders:
-            MedicationRemindersView(viewModel: container.medicationReminders.makeMedicationRemindersViewModel())
-        case .documentVault:
-            DocumentVaultView(
-                viewModel: container.documentVault.makeDocumentVaultViewModel(),
-                makeSummaryViewModel: { container.documentVault.makeSummaryViewModel() }
-            )
         }
     }
 }
 
 /// iPhone / compact-width layout: Home and Documents tabs, with Home pushing
-/// into the other features via its own NavigationStack.
+/// into the other features via the coordinator's `homePath`.
 private struct RootTabView: View {
-    let container: AppContainer
-    let coordinator: AppCoordinator
-
-    @State private var homePath = NavigationPath()
-    @State private var documentsPath = NavigationPath()
+    @Bindable var coordinator: AppCoordinator
+    let factory: RouteViewFactory
 
     var body: some View {
-        TabView {
-            NavigationStack(path: $homePath) {
-                DashboardView(viewModel: container.dashboard.makeDashboardViewModel()) { route in
-                    homePath.append(route)
-                }
-                .navigationDestination(for: AppRoute.self) { route in
-                    destination(for: route)
-                }
+        TabView(selection: $coordinator.selectedTab) {
+            NavigationStack(path: $coordinator.homePath) {
+                factory.view(for: .dashboard)
+                    .navigationDestination(for: AppRoute.self) { route in
+                        factory.view(for: route)
+                    }
             }
             .tabItem { Label("Home", systemImage: "house.fill") }
+            .tag(AppTab.home)
 
-            NavigationStack(path: $documentsPath) {
-                DocumentVaultView(
-                    viewModel: container.documentVault.makeDocumentVaultViewModel(),
-                    makeSummaryViewModel: { container.documentVault.makeSummaryViewModel() }
-                )
+            NavigationStack {
+                factory.view(for: .documentVault)
             }
             .tabItem { Label("Documents", systemImage: "folder.fill") }
+            .tag(AppTab.documents)
         }
         .modifier(SidebarTabBarPlacementModifier())
-    }
-
-    @ViewBuilder
-    private func destination(for route: AppRoute) -> some View {
-        switch route {
-        case .dashboard, .documentVault:
-            // Not reachable here: Dashboard only pushes its four quick-action
-            // routes, and Documents is its own tab rather than a pushed route.
-            EmptyView()
-        case .doctorSearch:
-            DoctorSearchView(viewModel: container.doctorSearch.makeDoctorSearchViewModel())
-        case .emergencySOS:
-            EmergencySOSView(viewModel: container.emergencySOS.makeEmergencySOSViewModel())
-        case .firstAidGuide:
-            FirstAidGuideView(viewModel: container.firstAid.makeFirstAidGuideViewModel())
-        case .medicationReminders:
-            MedicationRemindersView(viewModel: container.medicationReminders.makeMedicationRemindersViewModel())
-        }
     }
 }
 
