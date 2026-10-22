@@ -29,7 +29,11 @@ final class DocumentVaultContainer {
         repository: documentRepository
     )
 
-    private lazy var extractDocumentTextUseCase: ExtractDocumentTextUseCaseProtocol = ExtractDocumentTextUseCaseImpl()
+    private lazy var documentTextExtractor: DocumentTextExtractorProtocol = VisionDocumentTextExtractor()
+
+    private lazy var extractDocumentTextUseCase: ExtractDocumentTextUseCaseProtocol = ExtractDocumentTextUseCaseImpl(
+        textExtractor: documentTextExtractor
+    )
 
     private lazy var summarizeLabReportUseCase: SummarizeLabReportUseCaseProtocol = SummarizeLabReportUseCaseImpl(
         chatClient: chatCompletionClient
