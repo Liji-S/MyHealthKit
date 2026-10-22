@@ -1,7 +1,8 @@
 import Foundation
 
-/// Top-level navigation destinations. Each feature owns its own sub-route enum;
-/// this only covers root-level tab/flow entry points.
+/// Top-level navigation destinations, opened via `AppCoordinator.open(_:)` and
+/// mapped to screens by `RouteViewFactory`. Navigation *inside* a feature
+/// (list → detail, sheets) stays local to that feature's views.
 ///
 /// Also drives the iPad sidebar (NavigationSplitView) in addition to the
 /// iPhone TabView/push-navigation flow, so it includes `dashboard` and
