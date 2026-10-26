@@ -28,6 +28,9 @@
 		59A6CBCA302C9C780057C699 /* MyHealthKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyHealthKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		59A6CBD4302C9C780057C699 /* MyHealthKitUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyHealthKitUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		59A6CBFF302C9C880057C699 /* MyHealthKit/Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MyHealthKit/Secrets.xcconfig; sourceTree = SOURCE_ROOT; };
+		59F14657308F842400FD4EEE /* SKILL.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SKILL.md; sourceTree = "<group>"; };
+		59F14659308F842400FD4EEE /* SKILL.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SKILL.md; sourceTree = "<group>"; };
+		59F1465D308F846700FD4EEE /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -90,6 +93,8 @@
 		59A6CBB2302C9C770057C699 = {
 			isa = PBXGroup;
 			children = (
+				59F1465D308F846700FD4EEE /* CLAUDE.md */,
+				59F1465C308F842400FD4EEE /* .claude */,
 				59A6CBBD302C9C770057C699 /* MyHealthKit */,
 				59A6CBCD302C9C780057C699 /* MyHealthKitTests */,
 				59A6CBD7302C9C780057C699 /* MyHealthKitUITests */,
@@ -114,6 +119,39 @@
 				59A6CBFF302C9C880057C699 /* MyHealthKit/Secrets.xcconfig */,
 			);
 			name = "Recovered References";
+			sourceTree = "<group>";
+		};
+		59F14658308F842400FD4EEE /* add-use-case */ = {
+			isa = PBXGroup;
+			children = (
+				59F14657308F842400FD4EEE /* SKILL.md */,
+			);
+			path = "add-use-case";
+			sourceTree = "<group>";
+		};
+		59F1465A308F842400FD4EEE /* ship */ = {
+			isa = PBXGroup;
+			children = (
+				59F14659308F842400FD4EEE /* SKILL.md */,
+			);
+			path = ship;
+			sourceTree = "<group>";
+		};
+		59F1465B308F842400FD4EEE /* skills */ = {
+			isa = PBXGroup;
+			children = (
+				59F14658308F842400FD4EEE /* add-use-case */,
+				59F1465A308F842400FD4EEE /* ship */,
+			);
+			path = skills;
+			sourceTree = "<group>";
+		};
+		59F1465C308F842400FD4EEE /* .claude */ = {
+			isa = PBXGroup;
+			children = (
+				59F1465B308F842400FD4EEE /* skills */,
+			);
+			path = .claude;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
