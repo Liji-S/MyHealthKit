@@ -29,7 +29,7 @@ with numeric prefixes.
 <Feature Name>/
 ├── 1-Presentation/   Views/, ViewModels/ — SwiftUI + @Observable ViewModels
 ├── 2-Domain/         Entities/, UseCases/, Repositories/ (protocols), Services/ (protocols)
-├── 3-Data/           Repositories/, Services/, DataSources/, Storage/, DTOs/ — implementations
+├── 3-Data/           Repositories/, Services/, DataSources/, Storage/, DTOs/, Endpoints/ — implementations
 └── 4-DI/             <Feature>Container — wires the layers, builds ViewModels
 ```
 
@@ -51,6 +51,20 @@ Reference features: `Medication Reminders/` (repository-backed), `EmergencySOS/`
   their own file in `2-Domain/Entities/`.
 - ViewModels catch errors and expose user-friendly messages; don't let one action overwrite or
   clear another action's error.
+
+## Networking
+
+- HTTP goes through the NetworkKit package (`github.com/Liji-S/NetworkKit`), only from `3-Data/`.
+  Never build `URLRequest`s or call `URLSession` directly in a data source.
+- Each API call is an `Endpoint` in `3-Data/Endpoints/`; request/response types are DTOs in
+  `3-Data/DTOs/`. Fixed headers (API keys, bundle ID) go in a `NetworkEnvironment` there too.
+- Create one `NetworkClient` per server in `4-DI/` and inject it typed as `NetworkClientProtocol`.
+- Mark DTOs and endpoints `nonisolated`: the target defaults to MainActor isolation, but NetworkKit
+  encodes/decodes off the main actor.
+- Read-only POSTs (searches) opt in to retries with
+  `ExponentialBackoffRetryPolicy(retriesNonIdempotentRequests: true)`; never for writes.
+- Keep `logLevel` at `.basic` or lower for anything carrying health data — `.body` prints payloads.
+- Reference: Doctor Search (`GooglePlacesDataSourceImpl`).
 
 ## Concurrency
 
