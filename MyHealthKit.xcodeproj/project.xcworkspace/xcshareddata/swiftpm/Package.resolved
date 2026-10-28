@@ -1,0 +1,15 @@
+{
+  "originHash" : "bcb76cc112224b6a226fe8a8325966b492dcd53cb9ec4521a66ec8e57719b2d6",
+  "pins" : [
+    {
+      "identity" : "networkkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Liji-S/NetworkKit.git",
+      "state" : {
+        "revision" : "9f80aa866b03b061e02ff7778083772e3800ea14",
+        "version" : "0.1.0"
+      }
+    }
+  ],
+  "version" : 3
+}
