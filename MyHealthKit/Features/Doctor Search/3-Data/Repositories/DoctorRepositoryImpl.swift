@@ -23,11 +23,17 @@ final class DoctorRepositoryImpl: DoctorRepositoryProtocol {
         let withinRadius = results.filter { doctor in
             CLLocation(latitude: doctor.latitude, longitude: doctor.longitude).distance(from: userLocation) <= criteria.radiusInMeters
         }
-        return sortByDistance(withinRadius, from: userLocation)
+        return sortDoctorsFirst(withinRadius, from: userLocation)
     }
 
-    private func sortByDistance(_ doctors: [Doctor], from userLocation: CLLocation) -> [Doctor] {
+    /// Individual doctors before facilities, each group nearest first.
+    private func sortDoctorsFirst(_ doctors: [Doctor], from userLocation: CLLocation) -> [Doctor] {
         doctors.sorted {
+            let isDoctor1 = $0.kind == .doctor
+            let isDoctor2 = $1.kind == .doctor
+            if isDoctor1 != isDoctor2 {
+                return isDoctor1
+            }
             let d1 = CLLocation(latitude: $0.latitude, longitude: $0.longitude).distance(from: userLocation)
             let d2 = CLLocation(latitude: $1.latitude, longitude: $1.longitude).distance(from: userLocation)
             return d1 < d2

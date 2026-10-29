@@ -6,7 +6,8 @@ nonisolated enum GooglePlacesFieldMask {
     static let headerName = "X-Goog-FieldMask"
 
     static let searchResults = [
-        "places.id", "places.displayName", "places.formattedAddress", "places.location",
+        "places.id", "places.displayName", "places.primaryType", "places.formattedAddress",
+        "places.location",
         "places.internationalPhoneNumber", "places.rating", "places.userRatingCount",
         "places.websiteUri", "places.photos"
     ].joined(separator: ",")

@@ -47,9 +47,42 @@ final class GooglePlacesDataSourceImpl: GooglePlacesDataSourceProtocol {
         return response.places.map { $0.toDomain(specialty: "General", apiKey: apiKey, photoBaseURL: photoBaseURL) }
     }
 
+    /// Searches individual practitioners first (`doctor` type only) so a query
+    /// like "pediatrician" lists doctors rather than every hospital with a
+    /// pediatrics department. Falls back to an unrestricted search when Google
+    /// has no practitioner listings for the query, so it never returns nothing
+    /// where facilities exist.
     private func searchByText(specialty: String, latitude: Double, longitude: Double, radiusInMeters: Double) async throws -> [Doctor] {
+        let doctors = try await searchByText(
+            specialty: specialty,
+            includedType: "doctor",
+            latitude: latitude,
+            longitude: longitude,
+            radiusInMeters: radiusInMeters
+        )
+        if doctors.contains(where: { $0.kind == .doctor }) {
+            return doctors
+        }
+        return try await searchByText(
+            specialty: specialty,
+            includedType: nil,
+            latitude: latitude,
+            longitude: longitude,
+            radiusInMeters: radiusInMeters
+        )
+    }
+
+    private func searchByText(
+        specialty: String,
+        includedType: String?,
+        latitude: Double,
+        longitude: Double,
+        radiusInMeters: Double
+    ) async throws -> [Doctor] {
         let request = TextSearchRequestDTO(
             textQuery: specialty,
+            includedType: includedType,
+            strictTypeFiltering: includedType == nil ? nil : true,
             maxResultCount: Self.maxResultCount,
             locationBias: .init(
                 circle: .init(

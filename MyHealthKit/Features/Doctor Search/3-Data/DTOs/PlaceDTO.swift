@@ -4,6 +4,7 @@ import Foundation
 nonisolated struct PlaceDTO: Decodable, Sendable {
     let id: String
     let displayName: DisplayName?
+    let primaryType: String?
     let formattedAddress: String?
     let location: Location?
     let internationalPhoneNumber: String?
@@ -20,6 +21,7 @@ nonisolated struct PlaceDTO: Decodable, Sendable {
         Doctor(
             id: id,
             name: displayName?.text ?? "Unknown",
+            kind: kind,
             specialty: specialty,
             latitude: location?.latitude ?? 0,
             longitude: location?.longitude ?? 0,
@@ -30,6 +32,22 @@ nonisolated struct PlaceDTO: Decodable, Sendable {
             websiteURL: websiteUri.flatMap { URL(string: $0) },
             photoURL: photoURL(apiKey: apiKey, photoBaseURL: photoBaseURL)
         )
+    }
+
+    /// Individual practitioners are listed with primary type `doctor`; hospitals
+    /// and clinics usually carry `doctor` only as a secondary type, so the
+    /// primary type is what tells them apart.
+    private var kind: ProviderKind {
+        switch primaryType {
+        case "doctor":
+            return .doctor
+        case let type? where type.contains("hospital"):
+            return .hospital
+        case "pharmacy", "drugstore":
+            return .pharmacy
+        default:
+            return .clinic
+        }
     }
 
     private func photoURL(apiKey: String, photoBaseURL: URL) -> URL? {
