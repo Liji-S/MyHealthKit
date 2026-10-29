@@ -7,6 +7,7 @@ struct Doctor: Identifiable, Hashable, Codable {
     /// on list rows whose views got needlessly recycled.
     let id: String
     let name: String
+    let kind: ProviderKind
     let specialty: String
     let latitude: Double
     let longitude: Double

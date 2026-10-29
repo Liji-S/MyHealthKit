@@ -102,32 +102,29 @@ private struct DoctorCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if doctor.photoURL != nil {
-                Group {
-                    if let resolvedImage {
-                        Image(uiImage: resolvedImage)
-                            .resizable()
-                            .scaledToFill()
-                    } else {
-                        ZStack {
-                            Color(.tertiarySystemFill)
-                            Image(systemName: "building.2.fill")
-                                .font(.title2)
+            // Doctors get a portrait-style avatar next to their name instead;
+            // a wide banner only suits a facility's building photo.
+            if doctor.kind != .doctor, doctor.photoURL != nil {
+                facilityBanner
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .top, spacing: 12) {
+                    if doctor.kind == .doctor {
+                        doctorAvatar
+                    }
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(doctor.name)
+                            .font(.headline)
+
+                        HStack(spacing: 6) {
+                            kindBadge
+                            Text(doctor.specialty)
+                                .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
                     }
                 }
-                .frame(height: 100)
-                .clipped()
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(doctor.name)
-                    .font(.headline)
-
-                Text(doctor.specialty)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
 
                 if let rating = doctor.rating {
                     HStack(spacing: 4) {
@@ -156,6 +153,73 @@ private struct DoctorCard: View {
         .cardBackground()
         .padding(.horizontal)
         .padding(.vertical, 6)
+    }
+
+    private var facilityBanner: some View {
+        Group {
+            if let resolvedImage {
+                Image(uiImage: resolvedImage)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                ZStack {
+                    Color(.tertiarySystemFill)
+                    Image(systemName: kindSymbol)
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .frame(height: 100)
+        .clipped()
+    }
+
+    private var doctorAvatar: some View {
+        Group {
+            if let resolvedImage {
+                Image(uiImage: resolvedImage)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                ZStack {
+                    Color(.tertiarySystemFill)
+                    Image(systemName: "person.fill")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .frame(width: 56, height: 56)
+        .clipShape(Circle())
+        .accessibilityHidden(true)
+    }
+
+    private var kindBadge: some View {
+        Label(kindTitle, systemImage: kindSymbol)
+            .font(.caption2.bold())
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color.accentColor.opacity(0.15))
+            .foregroundStyle(Color.accentColor)
+            .clipShape(Capsule())
+    }
+
+    private var kindTitle: String {
+        switch doctor.kind {
+        case .doctor: "Doctor"
+        case .clinic: "Clinic"
+        case .hospital: "Hospital"
+        case .pharmacy: "Pharmacy"
+        }
+    }
+
+    private var kindSymbol: String {
+        switch doctor.kind {
+        case .doctor: "stethoscope"
+        case .clinic: "cross.case.fill"
+        case .hospital: "building.2.fill"
+        case .pharmacy: "pills.fill"
+        }
     }
 
     private var actionRow: some View {

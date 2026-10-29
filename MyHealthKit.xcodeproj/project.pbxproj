@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		59F1521C3092969700FD4EEE /* NetworkKit in Frameworks */ = {isa = PBXBuildFile; productRef = 59F1521B3092969700FD4EEE /* NetworkKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		59A6CBCB302C9C780057C699 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -70,6 +74,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59F1521C3092969700FD4EEE /* NetworkKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,6 +179,7 @@
 			);
 			name = MyHealthKit;
 			packageProductDependencies = (
+				59F1521B3092969700FD4EEE /* NetworkKit */,
 			);
 			productName = MyHealthKit;
 			productReference = 59A6CBBB302C9C770057C699 /* MyHealthKit.app */;
@@ -257,6 +263,9 @@
 			);
 			mainGroup = 59A6CBB2302C9C770057C699;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				59F1521A3092969700FD4EEE /* XCRemoteSwiftPackageReference "NetworkKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 59A6CBBC302C9C770057C699 /* Products */;
 			projectDirPath = "";
@@ -645,6 +654,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		59F1521A3092969700FD4EEE /* XCRemoteSwiftPackageReference "NetworkKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Liji-S/NetworkKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		59F1521B3092969700FD4EEE /* NetworkKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 59F1521A3092969700FD4EEE /* XCRemoteSwiftPackageReference "NetworkKit" */;
+			productName = NetworkKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 59A6CBB3302C9C770057C699 /* Project object */;
 }

@@ -1,4 +1,5 @@
 import Foundation
+import NetworkKit
 
 /// Feature-scoped composition root for Doctor Search. Owns wiring for everything
 /// this feature needs; AppContainer only holds one instance of this, not each
@@ -13,8 +14,12 @@ final class DoctorSearchContainer {
 
     private lazy var placesSearchCache = PlacesSearchCache()
 
+    private lazy var placesClient: NetworkClientProtocol = NetworkClient(
+        configuration: NetworkClientConfiguration(environment: .googlePlaces(apiKey: AppConfig.googlePlacesAPIKey))
+    )
+
     private lazy var googlePlacesDataSource: GooglePlacesDataSourceProtocol = CachedGooglePlacesDataSource(
-        wrapping: GooglePlacesDataSourceImpl(apiKey: AppConfig.googlePlacesAPIKey),
+        wrapping: GooglePlacesDataSourceImpl(client: placesClient, apiKey: AppConfig.googlePlacesAPIKey),
         cache: placesSearchCache,
         logger: logger
     )
